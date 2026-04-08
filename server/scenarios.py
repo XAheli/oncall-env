@@ -211,7 +211,7 @@ def grade_diagnosis(
         damage_penalty = min(collateral_damage_count * 0.03, 0.10)
         score += max(0.0, 0.10 - damage_penalty)
 
-    return round(min(max(score, 0.0), 1.0), 4)
+    return round(min(max(score, 0.01), 0.99), 4)
 
 
 def _keyword_score(text: str, keywords: List[str]) -> float:
