@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openenv-oncall"
+version = "1.0.0"
+description = "On-Call: Production Incident Response Environment for OpenEnv"
+requires-python = ">=3.10"
+dependencies = [
+    "openenv-core[core]>=0.2.2",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.24.0",
+    "pydantic>=2.0.0",
+    "httpx>=0.24.0",
+    "openai>=1.0.0",
+]
+
+[project.scripts]
+server = "oncall_env.server.app:main"
+
+[tool.setuptools]
+include-package-data = true
+packages = ["oncall_env", "oncall_env.server"]
+package-dir = { "oncall_env" = ".", "oncall_env.server" = "server" }
