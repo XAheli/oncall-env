@@ -196,7 +196,7 @@ class OnCallEnvironment(Environment):
             metric_name = params.get("metric_name", "request_latency_ms")
             if metric_name not in sd.metrics:
                 return self._step_obs(
-                    reward=0.01,
+                    reward=0.0,
                     action_result=(
                         f"Unknown metric '{metric_name}' for {service}. "
                         f"Available: {list(sd.metrics.keys())}"
@@ -318,9 +318,12 @@ class OnCallEnvironment(Environment):
 
         self._done = True
 
+        submit_reward = max(0.01, final_score - self._accumulated_reward)
+        submit_reward = round(min(submit_reward, 0.99), 4)
+
         return OnCallObservation(
             done=True,
-            reward=final_score,
+            reward=submit_reward,
             action_result=(
                 f"Diagnosis submitted. Final score: {final_score:.4f}. "
                 f"Root cause service: {submitted_service} "
