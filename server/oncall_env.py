@@ -107,7 +107,7 @@ class OnCallEnvironment(Environment):
 
         return OnCallObservation(
             done=False,
-            reward=0.0,
+            reward=0.01,
             action_result="Environment reset. Incident reported — begin investigation.",
             available_services=list(SERVICE_NAMES),
             incident_summary=self._scenario.incident_summary,
@@ -196,7 +196,7 @@ class OnCallEnvironment(Environment):
             metric_name = params.get("metric_name", "request_latency_ms")
             if metric_name not in sd.metrics:
                 return self._step_obs(
-                    reward=0.0,
+                    reward=0.01,
                     action_result=(
                         f"Unknown metric '{metric_name}' for {service}. "
                         f"Available: {list(sd.metrics.keys())}"
@@ -346,6 +346,7 @@ class OnCallEnvironment(Environment):
     def _step_obs(self, reward: float, **extra: Any) -> OnCallObservation:
         """Build an in-progress observation, applying the step penalty."""
         total_reward = reward + STEP_PENALTY
+        clamped = round(min(max(total_reward, 0.01), 0.99), 4)
         self._accumulated_reward += total_reward
 
         done = self._state.step_count >= self._scenario.max_steps  # type: ignore[union-attr]
@@ -354,7 +355,7 @@ class OnCallEnvironment(Environment):
 
         defaults: Dict[str, Any] = {
             "done": done,
-            "reward": round(total_reward, 4),
+            "reward": clamped,
             "available_services": list(SERVICE_NAMES),
             "incident_summary": self._scenario.incident_summary,  # type: ignore[union-attr]
             "step_number": self._state.step_count,
@@ -371,7 +372,7 @@ class OnCallEnvironment(Environment):
     def _terminal_obs(self, msg: str) -> OnCallObservation:
         return OnCallObservation(
             done=True,
-            reward=0.0,
+            reward=0.01,
             action_result=msg,
             available_services=list(SERVICE_NAMES),
             incident_summary=self._scenario.incident_summary if self._scenario else "",
