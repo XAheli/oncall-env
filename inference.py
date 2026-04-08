@@ -72,11 +72,11 @@ def log_step(step: int, action: str, reward: float, done: bool, error: Optional[
     )
 
 
-def log_end(success: bool, steps: int, rewards: List[float]) -> None:
+def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
     rw = ",".join(f"{r:.2f}" for r in rewards)
     print(
         f"[END] success={'true' if success else 'false'} "
-        f"steps={steps} rewards={rw}",
+        f"steps={steps} score={score:.2f} rewards={rw}",
         flush=True,
     )
 
@@ -245,14 +245,14 @@ async def run_task(llm_client: OpenAI, env: OnCallEnv, task_name: str) -> float:
                 break
 
         if rewards:
-            score = rewards[-1] if done else sum(rewards) / max_steps
-        score = min(max(score, 0.0), 1.0)
+            score = min(sum(rewards), 0.99)
+        score = min(max(score, 0.01), 0.99)
         success = score >= SUCCESS_THRESHOLD
 
     except Exception as exc:
         print(f"[DEBUG] Task {task_name} error: {exc}", flush=True)
     finally:
-        log_end(success=success, steps=steps_taken, rewards=rewards)
+        log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
 
     return score
 
